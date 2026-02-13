@@ -1,0 +1,13 @@
+package com.lcncbe.service;
+
+import com.lcncbe.model.User;
+
+public class CustomUserServiceImplementation implements CustomUserService {
+
+	@Override
+	public User findByEmail(String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

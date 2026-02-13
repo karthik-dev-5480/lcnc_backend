@@ -1,0 +1,30 @@
+package com.lcncbe.service;
+
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+
+public class EmailServiceImplementation implements EmailService {
+
+	
+	private JavaMailSender mailSender;
+	
+	
+	@Override
+	public void sendActivationEmail(String toEmail, String activationLink){
+	       SimpleMailMessage message = new SimpleMailMessage();
+	    	
+	       message.setFrom("dev.karthik.cheekati@gmail.com"); // Set your sender email
+	        message.setTo(toEmail);
+	        message.setSubject("Account Activation Required");
+	        
+	       String emailContent = String.format(
+	            "Welcome! Thank you for signing up. Please click the link below to activate your account:\n\n%s\n\nThis link will expire in 24 hours.",
+	            activationLink
+	        );
+	        message.setText(emailContent);
+	        
+
+	       mailSender.send(message);
+	}
+
+}

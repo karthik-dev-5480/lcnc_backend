@@ -1,0 +1,114 @@
+package com.lcncbe.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "widgets")
+public class Widgets {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long pageId;
+    private String type;
+    private String label;
+    private Double x;
+    private Double y;
+    private Long parentId;
+    private Integer widgetOrder; // New column for ordering
+
+    @OneToMany(mappedBy = "widget", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WidgetProperty> properties = new ArrayList<>();// Store colors, sizes, etc.
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getPageId() {
+		return pageId;
+	}
+
+	public void setPageId(Long pageId) {
+		this.pageId = pageId;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public Double getX() {
+		return x;
+	}
+
+	public void setX(Double x) {
+		this.x = x;
+	}
+
+	public Double getY() {
+		return y;
+	}
+
+	public void setY(Double y) {
+		this.y = y;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public Integer getWidgetOrder() {
+		return widgetOrder;
+	}
+
+	public void setWidgetOrder(Integer widgetOrder) {
+		this.widgetOrder = widgetOrder;
+	}
+
+	public List<WidgetProperty> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(List<WidgetProperty> properties) {
+		this.properties = properties;
+	}
+
+	
+
+   
+}

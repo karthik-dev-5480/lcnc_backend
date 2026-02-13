@@ -1,0 +1,11 @@
+package com.lcncbe.service;
+
+public class EmailServiceImplementation implements EmailService {
+
+	@Override
+	public void sendActivationEmail(String email, String activationLink) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

@@ -1,0 +1,5 @@
+package com.lcncbe.dto;
+
+public class AuthenticationResult {
+
+}

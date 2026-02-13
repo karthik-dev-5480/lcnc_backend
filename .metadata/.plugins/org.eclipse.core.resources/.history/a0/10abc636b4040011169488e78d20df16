@@ -1,0 +1,9 @@
+package com.lcncbe.service;
+
+import com.lcncbe.model.User;
+
+public interface CustomUserService {
+
+	User findByEmail(String email);	
+
+}

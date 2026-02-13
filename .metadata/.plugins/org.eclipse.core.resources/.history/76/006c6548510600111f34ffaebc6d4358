@@ -1,0 +1,10 @@
+package com.lcncbe.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.lcncbe.model.Pages;
+import com.lcncbe.model.User;
+
+public interface PageRepository extends JpaRepository< Pages ,Long> {
+
+}

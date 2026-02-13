@@ -1,0 +1,22 @@
+package com.lcncbe.service;
+
+import com.lcncbe.model.Pages;
+import com.lcncbe.repository.PageRepository;
+
+public class PageServiceImplementation implements PageService{
+	
+	private PageRepository pageRepository;
+	public PageServiceImplementation(PageRepository pageRepository) {
+		this.pageRepository=pageRepository;
+	}
+
+	@Override
+	public Pages createPage(String name) {
+		// TODO Auto-generated method stub
+		Pages newPage= new Pages();
+		newPage.setName(name);
+		Pages savedPage=pageRepository.save(newPage);
+		return savedPage;
+	}
+
+}

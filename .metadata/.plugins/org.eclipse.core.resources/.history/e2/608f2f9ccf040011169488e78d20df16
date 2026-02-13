@@ -1,0 +1,171 @@
+package com.lcncbe.controller;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.lcncbe.dto.SignupRequest;
+import com.lcncbe.dto.SignupResponse;
+import com.lcncbe.exception.UserException;
+import com.lcncbe.model.User;
+import com.lcncbe.service.CustomUserService;
+import com.lcncbe.service.EmailService;
+import com.lcncbe.service.JwtService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+	
+	
+	private JwtService jwtService;
+	private PasswordEncoder passwordEncoder;
+	private CustomUserService customUserService;
+	private EmailService emailService;
+	
+	
+	public AuthController(CustomUserService customUserService , PasswordEncoder passwordEncoder, JwtService jwtService, EmailService emailService) {
+		
+		this.customUserService=customUserService;
+		this.passwordEncoder= passwordEncoder;
+		this.jwtService=jwtService;
+		this.emailService=emailService;
+		
+	}
+	
+	
+	@PostMapping("/signup")
+	public ResponseEntity<SignupResponse>createUserHandler(@RequestBody SignupRequest user)throws UserException{
+		String email=user.getEmail();
+		String password=user.getPassword();
+		String firstNString=user.getFirstName();
+		String lastNString=user.getLastName();
+		String activationToken = UUID.randomUUID().toString();
+	    
+	    
+	    Calendar calendar = Calendar.getInstance();
+	    calendar.setTime(new Date());
+	    calendar.add(Calendar.HOUR_OF_DAY, 24);
+		User isEmailExist=customUserService.findByEmail(email);
+		if(isEmailExist!=null) {
+			throw new UserException("Email Not Found");
+		}
+		
+		//cache
+		
+		User savedUser=customUserService.createUser(email,password,firstNString,lastNString,activationToken,calendar);
+		
+		
+		try {
+	        String activationLink = "http://localhost:8080/auth/activate/" + activationToken; // Replace with your actual public domain
+	        emailService.sendActivationEmail(savedUser.getEmail(), activationLink);
+	    } catch (MailException e) {
+	        System.err.println("Failed to send activation email: " + e.getMessage());
+	    }
+		
+		SignupResponse signupResponse = new SignupResponse("Signup Success. Please check your email to activate your account.");
+	    return new ResponseEntity<>(signupResponse, HttpStatus.CREATED);
+		
+	}
+	
+	/*
+	@GetMapping("/activate/{token}")
+	public ResponseEntity<String> activateAccount(@PathVariable String token) {
+	    User user = userRepository.findByActivationToken(token);
+	    
+	    
+	    if (user == null) {
+	        return new ResponseEntity<>("Activation failed: Invalid token.", HttpStatus.BAD_REQUEST);
+	    }
+	    
+	    if (user.getTokenExpiryDate().before(new Date())) {
+	        return new ResponseEntity<>("Activation failed: Token has expired.", HttpStatus.BAD_REQUEST);
+	    }
+	    
+	    String email=user.getEmail();
+	    
+	    Boolean enable=customUserServiceImplementation.activateUser(email);
+
+	    if(enable) {
+		    return new ResponseEntity<>("Account successfully activated! You can now log in.", HttpStatus.OK);
+
+	    }
+
+	    return new ResponseEntity<>("Activation failed: User not found.", HttpStatus.BAD_REQUEST);
+	}
+	
+	@PostMapping("/signin")
+	public ResponseEntity<AuthResponse> loginUserHandler(@RequestBody LoginRequest loginRequest) {
+	    String username = loginRequest.getEmail();
+	    String password = loginRequest.getPassword();
+
+	    AuthenticationResult result = authenticate(username, password);
+	    System.out.println(result);
+	    if (!result.isSuccess()) {
+	        AuthResponse errorResponse = new AuthResponse(null, result.getErrorMessage());
+	        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED); 
+	    }
+
+	    Authentication authentication = result.getAuthentication();
+	    System.out.println("details"+authentication);
+	   
+	    SecurityContextHolder.getContext().setAuthentication(authentication);
+	    String token = jwtProvider.generateToken(authentication);
+	    AuthResponse authResponse = new AuthResponse(token, "Signin Success");
+	    
+	    return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
+	}
+	
+
+	
+	public AuthenticationResult authenticate(String username, String password) {
+	    UserDetails userDetails = customUserServiceImplementation.loadUserByUsername(username);
+
+	    if (userDetails == null) {
+	        return new AuthenticationResult("User Not Found");
+	    }
+
+	    System.out.println("auth"+userDetails);
+	    if (!userDetails.isEnabled()) {
+	        System.out.println(userDetails.isEnabled());
+	        return new AuthenticationResult("Please activate user");
+	    }
+
+	    if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+	        return new AuthenticationResult("Invalid password..");
+	    }
+	    
+	    Authentication successAuth = new UsernamePasswordAuthenticationToken(
+	        userDetails, 
+	        null, 
+	        userDetails.getAuthorities()
+	    );
+
+	    return new AuthenticationResult(successAuth);
+	}
+	
+*/
+}

@@ -1,0 +1,35 @@
+package com.lcncbe.controller;
+
+
+import com.lcncbe.model.Widgets;
+import com.lcncbe.repository.WidgetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/widgets")
+@CrossOrigin(origins = "http://localhost:3000") // Allow Next.js access
+public class WidgetController {
+
+    @Autowired
+    private WidgetRepository repository;
+
+    // Load all widgets for the designer
+    @GetMapping
+    public List<Widgets> getWidgets(@RequestParam String pageId) {
+        return repository.findByPageId(pageId);
+    }
+
+    // Handles both initial drop (Create) and property changes (Update)
+    @PostMapping("/sync")
+    public Widgets syncWidget(@RequestBody Widgets widget) {
+        return repository.save(widget);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteWidget(@PathVariable Long id) {
+        repository.deleteById(id);
+    }
+}

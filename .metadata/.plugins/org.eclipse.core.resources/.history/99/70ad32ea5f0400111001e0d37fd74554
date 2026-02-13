@@ -1,0 +1,6 @@
+package com.lcncbe.dto;
+
+public record PageRequest(
+	    String name, 
+	    String type
+	) {}
