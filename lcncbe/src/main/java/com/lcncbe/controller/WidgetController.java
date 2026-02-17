@@ -25,17 +25,13 @@ public class WidgetController {
     @Autowired
     private WidgetService widgetService;
 
-    /**
-     * Get all widgets for a page
-     */
+    
     @GetMapping
     public List<Widgets> getWidgets(@RequestParam Long pageId) {
         return widgetService.getWidgetsByPageId(pageId);
     }
 
-    /**
-     * Create or update a widget (handles both initial drop and property updates)
-     */
+    
     @PostMapping("/sync")
     @Transactional
     public ResponseEntity<?> syncWidget(@RequestBody Widgets widgetDto) {
@@ -61,17 +57,13 @@ public class WidgetController {
         }
     }
 
-    /**
-     * Delete a widget
-     */
+    
     @DeleteMapping("/{id}")
     public void deleteWidget(@PathVariable Long id) {
         widgetService.deleteWidget(id);
     }
 
-    /**
-     * Fix orphaned widgets by setting parentId to null if parent doesn't exist
-     */
+   
     @PostMapping("/fix-orphaned/{pageId}")
     public String fixOrphanedWidgets(@PathVariable Long pageId) {
         return widgetService.fixOrphanedWidgets(pageId);

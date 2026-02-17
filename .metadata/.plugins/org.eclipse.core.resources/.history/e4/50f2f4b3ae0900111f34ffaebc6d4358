@@ -1,0 +1,47 @@
+package com.lcncbe.controller;
+
+import org.springframework.web.bind.annotation.*;
+
+import com.lcncbe.dto.PageRequest;
+import com.lcncbe.dto.PageResponse;
+import com.lcncbe.model.Pages;
+import com.lcncbe.service.PageService;
+import com.lcncbe.repository.PageRepository;
+
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/pages")
+public class PageController {
+	
+	private PageService pageService;
+	
+
+	public PageController(PageService pageService) {
+		this.pageService = pageService;
+		
+	}
+
+    @PostMapping("/create")
+    public PageResponse createPage(@RequestBody PageRequest request, @RequestHeader("Authorization") String authHeader) {
+        // Log the creation for debugging
+    	String name = request.getName();
+    	String bg = request.getBackgroundColor(); // read background color
+
+    	
+    	// persist background color (keeps PageService API unchanged)
+    	if (bg == null || bg.isEmpty()) {
+    	    bg = "#ffffff"; // Or your preferred default
+    	}
+    	
+    	Pages page = pageService.createPage(name, bg);
+
+    	PageResponse p = new PageResponse(page.getId());
+        return p;
+    }
+    @GetMapping("/get/{id}")
+    public Object getPageById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        return pageService.findById(id);
+    }
+}

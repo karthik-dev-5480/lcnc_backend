@@ -1,0 +1,24 @@
+package com.lcncbe.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "meta_columns")
+public class DataColumn {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String columnName;
+    private String dataType;
+    private Integer length;
+    private Integer precision;
+    private Integer scale;
+    private boolean isPrimaryKey;
+    private boolean isIdentity;
+    private boolean isRequired;
+    private boolean isUnique;
+    private int columnOrder;
+}
