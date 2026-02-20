@@ -1,5 +1,6 @@
 package com.lcncbe.dto;
 
+import com.lcncbe.model.DataColumn;
 
 public class DataRelationshipResponse {
     private Long id;
@@ -9,7 +10,18 @@ public class DataRelationshipResponse {
     private String targetTable;
     private String targetColumn;
 
-    // Getters and Setters
+    
+	public DataRelationshipResponse(Long id, String fkName, String sourceTable, String sourceColumn, String targetTable,
+			String targetColumn) {
+		super();
+		this.id = id;
+		this.fkName = fkName;
+		this.sourceTable = sourceTable;
+		this.sourceColumn = sourceColumn;
+		this.targetTable = targetTable;
+		this.targetColumn = targetColumn;
+	}
+	// Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getFkName() { return fkName; }

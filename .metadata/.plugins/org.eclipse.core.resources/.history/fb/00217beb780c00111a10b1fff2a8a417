@@ -1,0 +1,30 @@
+package com.lcncbe.service;
+
+
+import com.lcncbe.dto.DataRelationshipRequest;
+import com.lcncbe.dto.DataRelationshipResponse;
+import com.lcncbe.dto.DataTableRequest;
+import com.lcncbe.dto.DataTableResponse;
+import com.lcncbe.model.DataTable;
+
+import java.util.List;
+
+import org.jspecify.annotations.Nullable;
+import org.springframework.http.ResponseEntity;
+
+public interface DataService {
+    // Table Operations
+    DataTableResponse createTable(DataTableRequest request);
+    DataTableResponse getTableById(Long id);
+    List<DataTableResponse> getAllTables();
+    DataTableResponse updateTable(Long id, DataTableRequest request);
+    void deleteTable(Long id);
+
+    // Relationship Operations
+    DataRelationshipResponse createRelationship(DataRelationshipRequest request);
+    List<DataRelationshipResponse> getAllRelationships();
+    void deleteRelationship(Long id);
+	String SyncSchema(Long tableData);
+	@Nullable
+	ResponseEntity<List<DataRelationshipResponse>>  getTableRelationships();
+}

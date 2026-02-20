@@ -9,6 +9,8 @@ import com.lcncbe.model.DataTable;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 public interface DataService {
     // Table Operations
     DataTableResponse createTable(DataTableRequest request);
@@ -22,4 +24,6 @@ public interface DataService {
     List<DataRelationshipResponse> getAllRelationships();
     void deleteRelationship(Long id);
 	String SyncSchema(Long tableData);
+	@Nullable
+	List<DataRelationshipResponse> getTableRelationships(Long id);
 }

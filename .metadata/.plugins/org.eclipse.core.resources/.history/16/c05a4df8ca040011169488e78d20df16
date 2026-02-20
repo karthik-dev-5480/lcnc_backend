@@ -1,6 +1,0 @@
-package com.lcncbe.service;
-
-
-public interface JwtService {
-
-}

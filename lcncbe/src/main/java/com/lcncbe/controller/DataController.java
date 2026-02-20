@@ -114,6 +114,11 @@ public class DataController {
     public ResponseEntity<List<DataRelationshipResponse>> getAllRelationships() {
         return ResponseEntity.ok(dataService.getAllRelationships());
     }
+    
+    @GetMapping("/table/relationships/{id}")
+    public ResponseEntity<List<DataRelationshipResponse>> getTableRelationships(@PathVariable Long id) {
+        return ResponseEntity.ok(dataService.getTableRelationships(id));
+    }
 
     @DeleteMapping("/relationships/{id}")
     public ResponseEntity<Void> deleteRelationship(@PathVariable Long id) {

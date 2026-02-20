@@ -14,6 +14,7 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -200,7 +201,7 @@ public class DataServiceImplementation implements DataService,DataColumnService 
     }
 
     private DataRelationshipResponse mapToRelationshipResponse(DataRelationship entity) {
-        DataRelationshipResponse response = new DataRelationshipResponse();
+        DataRelationshipResponse response = new DataRelationshipResponse(null, null, null, null, null, null);
         BeanUtils.copyProperties(entity, response);
         return response;
     }
@@ -288,4 +289,24 @@ public class DataServiceImplementation implements DataService,DataColumnService 
         res.setColumnOrder(entity.getColumnOrder());
         return res;
     }
+
+	@Override
+	public @Nullable List<DataRelationshipResponse> getTableRelationships(Long id) {
+		// TODO Auto-generated method stub
+		List<DataRelationship> relationships= relationshipRepository.findBySourceTableId(id);
+		
+		return relationships.stream()
+	            .map(dr -> new DataRelationshipResponse(
+	            	
+	                dr.getId(),
+	                dr.getFkName(),
+	                dr.getSourceTable().getTableName(),
+	                dr.getSourceColumn().getColumnName(),
+	                dr.getTargetTable().getTableName(),
+	                dr.getTargetColumn().getColumnName()
+	               
+	            ))
+	            .toList();
+
+	}
 }
