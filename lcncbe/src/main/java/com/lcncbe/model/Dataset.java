@@ -1,0 +1,116 @@
+package com.lcncbe.model;
+
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "meta_datasets")
+public class Dataset {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String datasetName;
+    private String description;
+
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DatasetTable> tables = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DatasetColumn> selectedColumns = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DatasetJoin> joins = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DatasetCondition> conditions = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DatasetParameter> parameters = new ArrayList<>();
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getDatasetName() {
+		return datasetName;
+	}
+
+	public void setDatasetName(String datasetName) {
+		this.datasetName = datasetName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<DatasetTable> getTables() {
+		return tables;
+	}
+
+	public void setTables(List<DatasetTable> tables) {
+		this.tables = tables;
+	}
+
+	public List<DatasetColumn> getSelectedColumns() {
+		return selectedColumns;
+	}
+
+	public void setSelectedColumns(List<DatasetColumn> selectedColumns) {
+		this.selectedColumns = selectedColumns;
+	}
+
+	public List<DatasetJoin> getJoins() {
+		return joins;
+	}
+
+	public void setJoins(List<DatasetJoin> joins) {
+		this.joins = joins;
+	}
+
+	public List<DatasetCondition> getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(List<DatasetCondition> conditions) {
+		this.conditions = conditions;
+	}
+
+	public List<DatasetParameter> getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(List<DatasetParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	public Dataset(Long id, String datasetName, String description, List<DatasetTable> tables,
+			List<DatasetColumn> selectedColumns, List<DatasetJoin> joins, List<DatasetCondition> conditions,
+			List<DatasetParameter> parameters) {
+		super();
+		this.id = id;
+		this.datasetName = datasetName;
+		this.description = description;
+		this.tables = tables;
+		this.selectedColumns = selectedColumns;
+		this.joins = joins;
+		this.conditions = conditions;
+		this.parameters = parameters;
+	}
+    
+    public Dataset() {
+    	
+    }
+}

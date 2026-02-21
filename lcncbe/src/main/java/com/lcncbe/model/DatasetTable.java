@@ -1,0 +1,82 @@
+package com.lcncbe.model;
+
+
+import com.lcncbe.model.DataTable;
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "meta_dataset_tables")
+public class DatasetTable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "dataset_id")
+    private Dataset dataset;
+
+    @ManyToOne
+    @JoinColumn(name = "table_id")
+    private DataTable dataTable;
+
+    @Column(name = "table_alias")
+    private String tableAlias; // e.g., t1, t2
+
+    @Column(name = "table_order")
+    private Integer tableOrder; // To determine base table vs joined tables
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Dataset getDataset() {
+		return dataset;
+	}
+
+	public void setDataset(Dataset dataset) {
+		this.dataset = dataset;
+	}
+
+	public DataTable getDataTable() {
+		return dataTable;
+	}
+
+	public void setDataTable(DataTable dataTable) {
+		this.dataTable = dataTable;
+	}
+
+	public String getTableAlias() {
+		return tableAlias;
+	}
+
+	public void setTableAlias(String tableAlias) {
+		this.tableAlias = tableAlias;
+	}
+
+	public Integer getTableOrder() {
+		return tableOrder;
+	}
+
+	public void setTableOrder(int tableOrder) {
+		this.tableOrder = tableOrder;
+	}
+
+	public DatasetTable(Long id, Dataset dataset, DataTable dataTable, String tableAlias, int tableOrder) {
+		super();
+		this.id = id;
+		this.dataset = dataset;
+		this.dataTable = dataTable;
+		this.tableAlias = tableAlias;
+		this.tableOrder = tableOrder;
+	}
+	public DatasetTable() {
+		
+	}
+    
+}

@@ -36,19 +36,19 @@ public class DataColumn {
     private Integer scale;
 
     @Column(name = "is_primary_key")
-    private boolean isPrimaryKey;
+    private Boolean isPrimaryKey;
 
     @Column(name = "is_identity")
-    private boolean isIdentity;
+    private Boolean isIdentity;
 
     @Column(name = "is_required")
-    private boolean isRequired;
+    private Boolean isRequired;
 
     @Column(name = "is_unique")
-    private boolean isUnique;
+    private Boolean isUnique;
 
     @Column(name = "column_order")
-    private int columnOrder;
+    private Integer columnOrder;
     
     @ManyToOne
     @JoinColumn(name = "table_id")
@@ -109,43 +109,43 @@ public class DataColumn {
 		this.scale = scale;
 	}
 
-	public boolean isPrimaryKey() {
+	public Boolean isPrimaryKey() {
 		return isPrimaryKey;
 	}
 
-	public void setPrimaryKey(boolean isPrimaryKey) {
+	public void setPrimaryKey(Boolean isPrimaryKey) {
 		this.isPrimaryKey = isPrimaryKey;
 	}
 
-	public boolean isIdentity() {
+	public Boolean isIdentity() {
 		return isIdentity;
 	}
 
-	public void setIdentity(boolean isIdentity) {
+	public void setIdentity(Boolean isIdentity) {
 		this.isIdentity = isIdentity;
 	}
 
-	public boolean isRequired() {
+	public Boolean isRequired() {
 		return isRequired;
 	}
 
-	public void setRequired(boolean isRequired) {
+	public void setRequired(Boolean isRequired) {
 		this.isRequired = isRequired;
 	}
 
-	public boolean isUnique() {
+	public Boolean isUnique() {
 		return isUnique;
 	}
 
-	public void setUnique(boolean isUnique) {
+	public void setUnique(Boolean isUnique) {
 		this.isUnique = isUnique;
 	}
 
-	public int getColumnOrder() {
+	public Integer getColumnOrder() {
 		return columnOrder;
 	}
 
-	public void setColumnOrder(int columnOrder) {
+	public void setColumnOrder(Integer columnOrder) {
 		this.columnOrder = columnOrder;
 	}
 
