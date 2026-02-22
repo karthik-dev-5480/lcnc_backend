@@ -1,7 +1,5 @@
 package com.lcncbe.model;
 
-
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,7 +15,6 @@ public class DatasetCondition {
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
-    // Left Side Operand (Always a column in this context)
     @ManyToOne
     @JoinColumn(name = "left_dataset_table_id")
     private DatasetTable leftDatasetTable;
@@ -26,84 +23,79 @@ public class DatasetCondition {
     @JoinColumn(name = "left_column_id")
     private DataColumn leftColumn;
 
-    // Operator (=, <, >, LIKE, IN)
     private String operator;
-
-    // Right Side Operand
-    private String rightOperandType; // VALUE, PARAMETER, CUSTOM_SQL
+    private String rightOperandType;
     
     @Column(name = "right_operand_value", length = 1000)
-    private String rightOperandValue; // Holds the actual string value, the parameter name, or the custom SQL snippet
+    private String rightOperandValue;
 
-	public Long getId() {
-		return id;
-	}
+    @Column(name = "condition_order")
+    private Integer conditionOrder;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Column(name = "logical_operator")
+    private String logicalOperator;
 
-	public Dataset getDataset() {
-		return dataset;
-	}
+    @Column(name = "open_paren_count")
+    private Integer openParenCount = 0;
 
-	public void setDataset(Dataset dataset) {
-		this.dataset = dataset;
-	}
+    @Column(name = "close_paren_count")
+    private Integer closeParenCount = 0;
 
-	public DatasetTable getLeftDatasetTable() {
-		return leftDatasetTable;
-	}
+    // --- CONSTRUCTORS ---
 
-	public void setLeftDatasetTable(DatasetTable leftDatasetTable) {
-		this.leftDatasetTable = leftDatasetTable;
-	}
+    // Default No-Args Constructor (Required by JPA)
+    public DatasetCondition() {
+    }
 
-	public DataColumn getLeftColumn() {
-		return leftColumn;
-	}
+    // Full Constructor (excluding ID, as it is usually auto-generated)
+    public DatasetCondition(Dataset dataset, DatasetTable leftDatasetTable, DataColumn leftColumn, 
+                            String operator, String rightOperandType, String rightOperandValue, 
+                            Integer conditionOrder, String logicalOperator, 
+                            Integer openParenCount, Integer closeParenCount) {
+        this.dataset = dataset;
+        this.leftDatasetTable = leftDatasetTable;
+        this.leftColumn = leftColumn;
+        this.operator = operator;
+        this.rightOperandType = rightOperandType;
+        this.rightOperandValue = rightOperandValue;
+        this.conditionOrder = conditionOrder;
+        this.logicalOperator = logicalOperator;
+        this.openParenCount = openParenCount;
+        this.closeParenCount = closeParenCount;
+    }
 
-	public void setLeftColumn(DataColumn leftColumn) {
-		this.leftColumn = leftColumn;
-	}
+    // --- GETTERS AND SETTERS ---
 
-	public String getOperator() {
-		return operator;
-	}
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public void setOperator(String operator) {
-		this.operator = operator;
-	}
+    public Dataset getDataset() { return dataset; }
+    public void setDataset(Dataset dataset) { this.dataset = dataset; }
 
-	public String getRightOperandType() {
-		return rightOperandType;
-	}
+    public DatasetTable getLeftDatasetTable() { return leftDatasetTable; }
+    public void setLeftDatasetTable(DatasetTable leftDatasetTable) { this.leftDatasetTable = leftDatasetTable; }
 
-	public void setRightOperandType(String rightOperandType) {
-		this.rightOperandType = rightOperandType;
-	}
+    public DataColumn getLeftColumn() { return leftColumn; }
+    public void setLeftColumn(DataColumn leftColumn) { this.leftColumn = leftColumn; }
 
-	public String getRightOperandValue() {
-		return rightOperandValue;
-	}
+    public String getOperator() { return operator; }
+    public void setOperator(String operator) { this.operator = operator; }
 
-	public void setRightOperandValue(String rightOperandValue) {
-		this.rightOperandValue = rightOperandValue;
-	}
+    public String getRightOperandType() { return rightOperandType; }
+    public void setRightOperandType(String rightOperandType) { this.rightOperandType = rightOperandType; }
 
-	public DatasetCondition(Long id, Dataset dataset, DatasetTable leftDatasetTable, DataColumn leftColumn,
-			String operator, String rightOperandType, String rightOperandValue) {
-		super();
-		this.id = id;
-		this.dataset = dataset;
-		this.leftDatasetTable = leftDatasetTable;
-		this.leftColumn = leftColumn;
-		this.operator = operator;
-		this.rightOperandType = rightOperandType;
-		this.rightOperandValue = rightOperandValue;
-	}
-	public DatasetCondition() {
-		
-	}
-    
+    public String getRightOperandValue() { return rightOperandValue; }
+    public void setRightOperandValue(String rightOperandValue) { this.rightOperandValue = rightOperandValue; }
+
+    public Integer getConditionOrder() { return conditionOrder; }
+    public void setConditionOrder(Integer conditionOrder) { this.conditionOrder = conditionOrder; }
+
+    public String getLogicalOperator() { return logicalOperator; }
+    public void setLogicalOperator(String logicalOperator) { this.logicalOperator = logicalOperator; }
+
+    public Integer getOpenParenCount() { return openParenCount; }
+    public void setOpenParenCount(Integer openParenCount) { this.openParenCount = openParenCount; }
+
+    public Integer getCloseParenCount() { return closeParenCount; }
+    public void setCloseParenCount(Integer closeParenCount) { this.closeParenCount = closeParenCount; }
 }

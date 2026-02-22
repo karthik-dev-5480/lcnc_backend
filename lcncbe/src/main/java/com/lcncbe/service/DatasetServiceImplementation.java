@@ -2,7 +2,6 @@ package com.lcncbe.service;
 
 import com.lcncbe.model.*;
 import com.lcncbe.repository.*;
-import com.lcncbe.service.DatasetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -86,8 +85,6 @@ public class DatasetServiceImplementation implements DatasetService {
 	public Object executeDynamicQuery(Long datasetId, String queryType, Map<String, Object> runtimeParams,
 			Map<String, Object> bodyData) {
 		Dataset ds = datasetRepo.findById(datasetId).orElseThrow();
-		StringBuilder sql = new StringBuilder();
-		List<Object> jdbcParams = new ArrayList<>();
 
 		switch (queryType.toUpperCase()) {
 		case "SELECT":
@@ -97,7 +94,7 @@ public class DatasetServiceImplementation implements DatasetService {
 			return handleInsert(ds, runtimeParams, bodyData);
 
 		case "UPDATE":
-			return handleUpdate(ds, runtimeParams,bodyData);
+			return handleUpdate(ds, runtimeParams, bodyData);
 
 		case "DELETE":
 			return handleDelete(ds, runtimeParams);
@@ -116,93 +113,95 @@ public class DatasetServiceImplementation implements DatasetService {
 		sql.append(cols.isEmpty() ? "*" : cols);
 
 		sql.append(buildFromAndJoins(ds));
-		sql.append(buildWhereClause(ds, params, new ArrayList<>())); // See helper below
+		
+		// Collect parameters in the EXACT order they are appended in the WHERE clause
+		List<Object> values = new ArrayList<>();
+		sql.append(buildWhereClause(ds, params, values)); 
 
-		List<Object> values = extractParamValues(ds, params);
 		return jdbcTemplate.queryForList(sql.toString(), values.toArray());
 	}
 
 	// --- 2. INSERT LOGIC ---
 	private Map<String, Object> handleInsert(Dataset ds, Map<String, Object> queryParams, Map<String, Object> bodyData) {
-    // 1. Identify the target table (usually the base table t1)
-    DatasetTable baseTable = ds.getTables().stream()
-            .filter(t -> t.getTableOrder() == 1)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No base table defined for insert"));
+		// 1. Identify the target table (usually the base table t1)
+		DatasetTable baseTable = ds.getTables().stream()
+				.filter(t -> t.getTableOrder() == 1)
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("No base table defined for insert"));
 
-    String tableName = baseTable.getDataTable().getTableName();
+		String tableName = baseTable.getDataTable().getTableName();
 
-    // 2. Build Column names and Placeholders from metadata
-    List<String> colNames = new ArrayList<>();
-    List<String> placeholders = new ArrayList<>();
-    List<Object> jdbcValues = new ArrayList<>();
+		// 2. Build Column names and Placeholders from metadata
+		List<String> colNames = new ArrayList<>();
+		List<String> placeholders = new ArrayList<>();
+		List<Object> jdbcValues = new ArrayList<>();
 
-    Map<String, Object> caseInsensitiveData = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    caseInsensitiveData.putAll(bodyData);
+		Map<String, Object> caseInsensitiveData = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		caseInsensitiveData.putAll(bodyData);
 
-    for (DatasetColumn dsCol : ds.getSelectedColumns()) {
-        String dbColumnName = dsCol.getDataColumn().getColumnName();
+		for (DatasetColumn dsCol : ds.getSelectedColumns()) {
+			String dbColumnName = dsCol.getDataColumn().getColumnName();
 
-        // Check against the case-insensitive map
-        if (caseInsensitiveData.containsKey(dbColumnName)) {
-            colNames.add(dbColumnName);
-            placeholders.add("?");
-            jdbcValues.add(caseInsensitiveData.get(dbColumnName));
-        }
-    }
+			// Check against the case-insensitive map
+			if (caseInsensitiveData.containsKey(dbColumnName)) {
+				colNames.add(dbColumnName);
+				placeholders.add("?");
+				jdbcValues.add(caseInsensitiveData.get(dbColumnName));
+			}
+		}
 
-    if (colNames.isEmpty()) {
-        throw new RuntimeException("No valid columns provided in payload for insert");
-    }
+		if (colNames.isEmpty()) {
+			throw new RuntimeException("No valid columns provided in payload for insert");
+		}
 
-    String sql = String.format("INSERT INTO %s (%s) VALUES (%s)", 
-            tableName, String.join(", ", colNames), String.join(", ", placeholders));
+		String sql = String.format("INSERT INTO %s (%s) VALUES (%s)", 
+				tableName, String.join(", ", colNames), String.join(", ", placeholders));
 
-    int rows = jdbcTemplate.update(sql, jdbcValues.toArray());
+		int rows = jdbcTemplate.update(sql, jdbcValues.toArray());
 
-    return Map.of("status", "success", "affected_rows", rows);
-}
+		return Map.of("status", "success", "affected_rows", rows);
+	}
 
 	// --- 3. UPDATE LOGIC ---
 	private Map<String, Object> handleUpdate(Dataset ds, Map<String, Object> queryParams, Map<String, Object> bodyData) {
-    // 1. Get the base table and its alias
-    DatasetTable base = ds.getTables().stream()
-            .filter(t -> t.getTableOrder() == 1)
-            .findFirst()
-            .orElseThrow();
-    
-    // 2. Start UPDATE with Alias: "UPDATE Products t1 SET "
-    StringBuilder sql = new StringBuilder("UPDATE ")
-            .append(base.getDataTable().getTableName())
-            .append(" ")
-            .append(base.getTableAlias())
-            .append(" SET ");
-            
-    List<Object> jdbcValues = new ArrayList<>();
+		// 1. Get the base table and its alias
+		DatasetTable base = ds.getTables().stream()
+				.filter(t -> t.getTableOrder() == 1)
+				.findFirst()
+				.orElseThrow();
+		
+		// 2. Start UPDATE with Alias: "UPDATE Products t1 SET "
+		StringBuilder sql = new StringBuilder("UPDATE ")
+				.append(base.getDataTable().getTableName())
+				.append(" ")
+				.append(base.getTableAlias())
+				.append(" SET ");
+				
+		List<Object> jdbcValues = new ArrayList<>();
 
-    // Use a Set to track processed columns and avoid duplicates
-    Set<String> processedColumns = new HashSet<>();
+		// Use a Set to track processed columns and avoid duplicates
+		Set<String> processedColumns = new HashSet<>();
 
-    String sets = ds.getSelectedColumns().stream()
-        .filter(c -> bodyData.containsKey(c.getDataColumn().getColumnName()))
-        .filter(c -> processedColumns.add(c.getDataColumn().getColumnName())) // Only unique cols
-        .map(c -> {
-            String colName = c.getDataColumn().getColumnName();
-            jdbcValues.add(bodyData.get(colName)); 
-            // In the SET part, use the alias: t1.column_name = ?
-            return base.getTableAlias() + "." + colName + " = ?";
-        }).collect(Collectors.joining(", "));
-    
-    if (sets.isEmpty()) throw new RuntimeException("No data provided for update");
-    
-    sql.append(sets);
+		String sets = ds.getSelectedColumns().stream()
+			.filter(c -> bodyData.containsKey(c.getDataColumn().getColumnName()))
+			.filter(c -> processedColumns.add(c.getDataColumn().getColumnName())) // Only unique cols
+			.map(c -> {
+				String colName = c.getDataColumn().getColumnName();
+				jdbcValues.add(bodyData.get(colName)); 
+				// In the SET part, use the alias: t1.column_name = ?
+				return base.getTableAlias() + "." + colName + " = ?";
+			}).collect(Collectors.joining(", "));
+		
+		if (sets.isEmpty()) throw new RuntimeException("No data provided for update");
+		
+		sql.append(sets);
 
-    // 3. WHERE PART (buildWhereClause already uses aliases, so this now matches)
-    sql.append(buildWhereClause(ds, queryParams, jdbcValues));
+		// 3. WHERE PART 
+		sql.append(buildWhereClause(ds, queryParams, jdbcValues));
 
-    int rows = jdbcTemplate.update(sql.toString(), jdbcValues.toArray());
-    return Map.of("affected_rows", rows, "status", "success");
-}
+		int rows = jdbcTemplate.update(sql.toString(), jdbcValues.toArray());
+		return Map.of("affected_rows", rows, "status", "success");
+	}
 
 	// --- 4. DELETE LOGIC ---
 	private Map<String, Object> handleDelete(Dataset ds, Map<String, Object> params) {
@@ -234,30 +233,51 @@ public class DatasetServiceImplementation implements DatasetService {
 		return sb.toString();
 	}
 
+	// --- DYNAMIC WHERE CLAUSE BUILDER ---
 	private String buildWhereClause(Dataset ds, Map<String, Object> params, List<Object> valueCollector) {
-		if (ds.getConditions().isEmpty())
+		if (ds.getConditions() == null || ds.getConditions().isEmpty()) {
 			return "";
+		}
+
+		// 1. Sort conditions by order so sequence is respected
+		List<DatasetCondition> sortedConditions = ds.getConditions().stream()
+			.sorted(Comparator.comparing(c -> c.getConditionOrder() == null ? 0 : c.getConditionOrder()))
+			.collect(Collectors.toList());
+
 		StringBuilder sb = new StringBuilder(" WHERE ");
-		List<String> parts = new ArrayList<>();
-		for (DatasetCondition cond : ds.getConditions()) {
+
+		for (int i = 0; i < sortedConditions.size(); i++) {
+			DatasetCondition cond = sortedConditions.get(i);
+
+			// 2. Add Logical Operator (AND/OR) if it's NOT the first condition
+			if (i > 0) {
+				String logOp = (cond.getLogicalOperator() != null && !cond.getLogicalOperator().trim().isEmpty()) 
+								? cond.getLogicalOperator() : "AND";
+				sb.append(" ").append(logOp).append(" ");
+			}
+
+			// 3. Add Opening Parentheses
+			if (cond.getOpenParenCount() != null && cond.getOpenParenCount() > 0) {
+				sb.append("(".repeat(cond.getOpenParenCount()));
+			}
+
+			// 4. Build the actual condition (t1.col_name >= ?)
 			String left = cond.getLeftDatasetTable().getTableAlias() + "." + cond.getLeftColumn().getColumnName();
+			
 			if ("PARAMETER".equals(cond.getRightOperandType())) {
-				parts.add(left + " " + cond.getOperator() + " ?");
+				sb.append(left).append(" ").append(cond.getOperator()).append(" ?");
 				valueCollector.add(params.get(cond.getRightOperandValue()));
 			} else {
-				parts.add(left + " " + cond.getOperator() + " " + cond.getRightOperandValue());
+				// Static VALUE
+				sb.append(left).append(" ").append(cond.getOperator()).append(" ").append(cond.getRightOperandValue());
 			}
-		}
-		return sb.append(String.join(" AND ", parts)).toString();
-	}
 
-	private List<Object> extractParamValues(Dataset ds, Map<String, Object> params) {
-		List<Object> values = new ArrayList<>();
-		for (DatasetCondition cond : ds.getConditions()) {
-			if ("PARAMETER".equals(cond.getRightOperandType())) {
-				values.add(params.get(cond.getRightOperandValue()));
+			// 5. Add Closing Parentheses
+			if (cond.getCloseParenCount() != null && cond.getCloseParenCount() > 0) {
+				sb.append(")".repeat(cond.getCloseParenCount()));
 			}
 		}
-		return values;
+
+		return sb.toString();
 	}
 }
